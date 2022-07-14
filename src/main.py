@@ -23,9 +23,8 @@ current_dt = datetime.now().strftime("%m-%d-%Y %H-%M-%S")
 
 # create structure - team, workspace, project, dataset
 team = api.team.create(f"my team {current_dt}")
-print(team)
 workspace = api.workspace.create(team.id, f"my workspace {current_dt}")
-print(workspace)
+print(team, '\n', workspace)
 
 # create project, classes and tags
 project = api.project.create(workspace.id, "my project")
@@ -56,7 +55,6 @@ ann1 = sly.Annotation(img_size=[1600, 1200]) # height x width
 ann1 = ann1.add_labels([cat1, cat2]) # Note: most objects in SDK are immutable 
 ann1 = ann1.add_tags([tag_img1])
 api.annotation.upload_ann(image_info1.id, ann1)
-
 
 # prepare annotation for the first image
 dog1 = sly.Label(sly.Rectangle(top=580, left=295, bottom=857, right=576), class_dog)
