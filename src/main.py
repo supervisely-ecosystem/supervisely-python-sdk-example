@@ -63,3 +63,10 @@ ann2 = sly.Annotation(img_size=[1080, 810]) # height x width
 ann2 = ann2.add_label(dog1)
 ann2 = ann2.add_tag(tag_img2)
 api.annotation.upload_ann(image_info2.id, ann2)
+
+# let's download images and annotations
+img1 = api.image.download_np(image_info1.id)  # RGB
+img2 = api.image.download_np(image_info2.id)  # RGB
+print(img1.shape, "\n", img2.shape)
+ann1_json = api.annotation.download_json(image_info1.id) 
+ann2_json = api.annotation.download_json(image_info2.id) 
