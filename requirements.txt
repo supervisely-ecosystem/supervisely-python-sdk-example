@@ -1,4 +1,1 @@
 supervisely
-
-# for great automatic python code formatter
-black
