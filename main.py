@@ -1,6 +1,9 @@
+import json
 import supervisely as sly
 
-api = sly.Api(server_address="dfsdfsdf", token="dfsfsd")
+# put your values, learn more here - https://developer.supervise.ly/getting-started/first-steps/basics-of-authentication
+# api = sly.Api(server_address="https://app.supervise.ly", token="4r47NFo1ky-long.random.string.here-xaTatb")
+api = sly.Api(server_address="https://dev.supervise.ly/", token="4r47NFo1kyMLNvu2mgIeV2SaXdkv1RMMMQCcKWJmwuwZghTZwuI8EuYkn6FZ8cui9G7N4prYwc4FXgghSuhcBWX5WuSgYr0XHZ8AWw3uBzlNpyf7axlCTppQBuxaTatb")
 
 # let's test that authentication was successful and we can communicate with the platform
 my_teams = api.team.get_list()
@@ -10,32 +13,36 @@ print(f"I'm the member of {len(my_teams)} teams")
 team = my_teams[0]
 workspace = api.workspace.get_list(team.id)[0]
 
-# create project, classes and tags on server # TODO describe
-project = api.project.create(workspace.id, f"animals", change_name_if_conflict=True)
-dataset = api.dataset.create(project.id, f"cats", change_name_if_conflict=True)
+# create on server project with name 'animals' with one dataset with name 'cats'
+project = api.project.create(workspace.id, "animals", change_name_if_conflict=True)
+dataset = api.dataset.create(project.id, "cats", change_name_if_conflict=True)
+print(f"New project {project.id} with one dataset {dataset.id} on server are created")
 
-# lets init two !!! annotation classes !!! of shape rectangles with green and red borders # TODO describe
-class_cat = sly.ObjClass("cat", sly.Rectangle, color=[0, 255, 0])
+# lets init one annotation class (rectangle), color is green for visual convenience
+cat_class = sly.ObjClass("cat", sly.Rectangle, color=[0, 255, 0])
+# lets init one annotation tag, value can be any string 
 scene_tag = sly.TagMeta("scene", sly.TagValueType.ANY_STRING)
 
-# init project meta - classes and tags we are going to label?????
-project_meta = sly.ProjectMeta([classes], [tags]) # - class and tags can be lists #TODO
+# init project meta - define classes and tags we are going to label
+project_meta = sly.ProjectMeta(obj_classes=[cat_class], tag_metas=[scene_tag])
 
-# update project classes and tags to server
+# set classes and tags in our new empty project on server
 api.project.update_meta(project.id, project_meta.to_json())
 
-# upload images to dataset
-image_info = api.image.upload_path(dataset.id, "cats.jpg", "images/cats.jpg")
+# upload local image to dataset
+image_info = api.image.upload_path(dataset.id, name="my-cats.jpg", path="images/my-cats.jpg")
 
-# prepare annotation for the first image
-cat1 = sly.Label(sly.Rectangle(top=875, left=127, bottom=1410, right=581), class_cat)
-cat2 = sly.Label(sly.Rectangle(top=549, left=266, bottom=1500, right=1199), class_cat) 
-tag_img1 = sly.Tag(scene_tag, "indoor")
-ann1 = sly.Annotation(img_size=[1600, 1200], labels=[cat1, cat2], tags=[tag_img1]) # height x width #TODO allow to input lists
-api.annotation.upload_ann(image_info.id, ann1)
+# init labels (bboxs) for cats and one tag will be assigned to image
+cat1 = sly.Label(sly.Rectangle(top=875, left=127, bottom=1410, right=581), cat_class)
+cat2 = sly.Label(sly.Rectangle(top=549, left=266, bottom=1500, right=1199), cat_class) 
+tag = sly.Tag(scene_tag, value="indoor")
 
-# let's download images and annotations
-img1 = api.image.download_np(image_info1.id)  # RGB
-print("width, height and channels of image "img1.shape, "\n", img2.shape) # delete?
-ann1_json = api.annotation.download_json(image_info1.id) 
-print("dict???:", ann1_json)
+# init annotaiton and then upload it to server
+ann = sly.Annotation(img_size=[1600, 1200], labels=[cat1, cat2], img_tags=[tag]) # img_size=[height, width]
+api.annotation.upload_ann(image_info.id, ann)
+
+# let's download image and annotation from server
+img = api.image.download_np(image_info.id)  # RGB ndarray
+print("image shape (height, width, channels)", img.shape)
+ann_json = api.annotation.download_json(image_info.id) 
+print("annotaiton (default python dict):\n", json.dumps(ann_json, indent=4))
