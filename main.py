@@ -1,9 +1,9 @@
 import json
 import supervisely as sly
 
-# put your values, learn more here - https://developer.supervise.ly/getting-started/first-steps/basics-of-authentication
-# api = sly.Api(server_address="https://app.supervise.ly", token="4r47NFo1ky-long.random.string.here-xaTatb")
-api = sly.Api(server_address="https://dev.supervise.ly/", token="4r47NFo1kyMLNvu2mgIeV2SaXdkv1RMMMQCcKWJmwuwZghTZwuI8EuYkn6FZ8cui9G7N4prYwc4FXgghSuhcBWX5WuSgYr0XHZ8AWw3uBzlNpyf7axlCTppQBuxaTatb")
+# put your values (example is for Community edition) 
+# learn more here - https://developer.supervise.ly/getting-started/first-steps/basics-of-authentication
+api = sly.Api(server_address="https://app.supervise.ly", token="4r47NFo1ky-long.random.string.here-xaTatb")
 
 # let's test that authentication was successful and we can communicate with the platform
 my_teams = api.team.get_list()
