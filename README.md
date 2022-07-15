@@ -1,75 +1,91 @@
-<div align="center" markdown>
-<img src="https://imgur.com/7IHY0Gs.png">
+# Into to Supervisely SDK for Python
 
-# Export Supervisely Volumes
+In this example we will show you how it is easy to communicate with your Supervisely instance (Community or your private Enterprise installation) from python code. The tutorial illustrates basic upload-download scenario:
 
-<p align="center">
-  <a href="#Overview">Overview</a>
-  <a href="#How-To-Run">How To Run</a>
-  <a href="#How-To-Use">How To Use</a>
-</p>
+* create project and dataset on server
+* upload image
+* programmatically create annotation (two bounding boxes and tag) and upload it to image
+* download image and annotation
 
+You can try this example for yourself: VSCode project config, original image, and python script for this tutorial are ready on [GitHub](https://github.com/supervisely-ecosystem/supervisely-python-sdk-example).
 
+## Installation
 
-[![](https://img.shields.io/badge/supervisely-ecosystem-brightgreen)](https://ecosystem.supervise.ly/apps/export-volume-project)
-[![](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://supervise.ly/slack)
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/supervisely-ecosystem/export-volume-project)
-[![views](https://app.supervise.ly/public/api/v3/ecosystem.counters?repo=supervisely-ecosystem/export-volume-project&counter=views&label=views)](https://supervise.ly)
-[![used by teams](https://app.supervise.ly/public/api/v3/ecosystem.counters?repo=supervisely-ecosystem/export-volume-project&counter=downloads&label=used%20by%20teams)](https://supervise.ly)
-[![runs](https://app.supervise.ly/public/api/v3/ecosystem.counters?repo=supervisely-ecosystem/export-volume-project&counter=runs&label=runs&123)](https://supervise.ly)
+Run the following command (learn more [here](../installation.md))
 
-</div>
+```
+pip install supervisely
+```
 
-## Overview
+## Input data
 
-Export Supervisely volume project or dataset. You can learn more about format and its structure by reading [documentation](https://docs.supervise.ly/data-organization/00_ann_format_navi/08_supervisely_format_volume).
+![Input image preview ](https://user-images.githubusercontent.com/12828725/179228335-93ac7ec5-31e1-46da-b8fa-86d3bfe3b769.jpg)
 
+## Python code
 
-Application key points:
-- Download annotations in `.json` and `.stl` formats
-- Download volumes data in `.nrrd` format
-- Convert closed mesh surfaces (`.stl`) to 3d masks (`.nrrd`)
+### Import and authentication
 
-<div>
-  <table>
-    <tr style="width: 100%">
-      <td>
-        <b>Volumes Data in Supervisely format</b>
-        <img src="https://github.com/supervisely-ecosystem/export-volume-project/releases/download/v1.0.1/interface.gif?raw=true" style="width:150%;"/>
-      </td>
-      <td>
-        <b>Exported .stl with 3d segmentation masks</b>
-        <img src="https://github.com/supervisely-ecosystem/export-volume-project/releases/download/v1.0.1/slicer_result.gif?raw=true" style="width:150%;"/>
-      </td>
-    </tr>
-  </table
-</div>
+Import Supervisely, initialize API with your credentials and test authentication ([learn the basics of authentication here](basics-of-authentication.md)). In this example, we use the server address of Community Edition. Change it if you have a private instance of Supervisely.
 
+```python
+import json
+import supervisely as sly
 
+api = sly.Api(server_address="https://app.supervise.ly", token="4r47N...xaTatb")
 
-# How To Run 
+my_teams = api.team.get_list()
+print(f"I'm a member of {len(my_teams)} teams")
+```
 
-1. Add  [Export volumes project in supervisely format](https://ecosystem.supervise.ly/apps/export-volume-project)
+### Create project on server
 
-<img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/export-volume-project" src="https://imgur.com/WZFpiDE.png" width="450px" style='padding-bottom: 20px'/>
+Let's create an empty project `animals` with one dataset `cats`, then one class `cat` of shape Rectangle and one tag `scene` with string value and upload them into the project. Now we can use created classes and tags for labeling.
 
-2. Run app from the context menu of **Volume Project** or **Volumes Dataset** -> `Download via app` -> `Export Supervisely volume project in supervisely format`
+```python
+project = api.project.create(workspace.id, "animals", change_name_if_conflict=True)
+dataset = api.dataset.create(project.id, "cats", change_name_if_conflict=True)
+print(f"Project {project.id} with dataset {dataset.id} are created")
 
-<img src="https://imgur.com/xGX2kjq.png"/>
+cat_class = sly.ObjClass("cat", sly.Rectangle, color=[0, 255, 0])
+scene_tag = sly.TagMeta("scene", sly.TagValueType.ANY_STRING)
+project_meta = sly.ProjectMeta(obj_classes=[cat_class], tag_metas=[scene_tag])
 
-3. Define export settings in modal window and press the **Run** button
+api.project.update_meta(project.id, project_meta.to_json())
+```
 
-<div align="center" markdown>
-<img src="https://i.imgur.com/y4MGWUM.png" width="650"/>
-</div>
+### Upload image
 
-# How To Use 
+Let's upload local image  `images/my-cats.jpg` to dataset.
 
-1. Wait for the app to process your data, once done, a link for download will become available
-<img src="https://imgur.com/9SYRK5n.png"/>
+```python
+image_info = api.image.upload_path(dataset.id, name="my-cats.jpg", path="images/my-cats.jpg")
+```
 
-2. Result archive will be available for download by link at `Tasks` page or from `Team Files` by the following path:
+### Create annotation and upload to image
 
+```python
+cat1 = sly.Label(sly.Rectangle(top=875, left=127, bottom=1410, right=581), cat_class)
+cat2 = sly.Label(sly.Rectangle(top=549, left=266, bottom=1500, right=1199), cat_class) 
+tag = sly.Tag(scene_tag, value="indoor")
 
-* `Team Files`->`Export-Supervisely-volumes-projects`->`<task_id>_<projectId>_<projectName>.tar`
-<img src="https://imgur.com/02KtweO.png"/>
+ann = sly.Annotation(img_size=[1600, 1200], labels=[cat1, cat2], img_tags=[tag])
+api.annotation.upload_ann(image_info.id, ann)
+```
+
+### Download data
+
+```python
+img = api.image.download_np(image_info.id)  # RGB ndarray
+print("image shape (height, width, channels)", img.shape)
+
+ann_json = api.annotation.download_json(image_info.id) 
+print("annotaiton:\n", json.dumps(ann_json, indent=4))
+```
+
+## Result
+
+In less than 50 lines of code (including lots of comments) you can easily automate Supervisely using Python and integrate it with your software stack.
+
+That’s just a taste of what you can do with the Supervisely SDK for Python. For more, take a look [at the reference](https://supervisely.readthedocs.io/en/latest/sdk\_packages.html) and [Supervisely Annotation JSON format](https://developer.supervise.ly/api-references/supervisely-annotation-json-format).
+
+![Result in labeling tool](https://user-images.githubusercontent.com/12828725/179226131-cd7f7058-ebca-4aa1-8660-951bf88a42af.png)
