@@ -7,7 +7,7 @@ api = sly.Api(server_address="https://dev.supervise.ly/", token="4r47NFo1kyMLNvu
 
 # let's test that authentication was successful and we can communicate with the platform
 my_teams = api.team.get_list()
-print(f"I'm the member of {len(my_teams)} teams")
+print(f"I'm a member of {len(my_teams)} teams")
 
 # get first team and workspace
 team = my_teams[0]
