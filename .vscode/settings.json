@@ -1,5 +1,5 @@
 {
-  "python.defaultInterpreterPath": "venv/bin/python3",
+  // "__backup__python.defaultInterpreterPath": "venv/bin/python3",
   "files.exclude": {
     "**/__pycache__": true,
     "venv": true
