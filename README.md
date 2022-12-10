@@ -1,4 +1,4 @@
-# Into to Supervisely SDK for Python
+# Intro to Supervisely SDK for Python
 
 In this example we will show you how it is easy to communicate with your Supervisely instance (Community or your private Enterprise installation) from python code. The tutorial illustrates basic upload-download scenario:
 
