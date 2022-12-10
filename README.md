@@ -9,7 +9,7 @@ In this example we will show you how it is easy to communicate with your Supervi
 
 You can try this example for yourself: VSCode project config, original image, and python script for this tutorial are ready on [GitHub](https://github.com/supervisely-ecosystem/supervisely-python-sdk-example).
 
-Whatche the video tutorial here:
+Watch the video tutorial here:
 
 <a href="https://youtu.be/Mp0BnWEujhA">
     <img src="https://user-images.githubusercontent.com/12828725/180598221-f92649d7-bcda-4f9d-94cc-fd1b4734a7c6.png" style="max-width:100%;">
