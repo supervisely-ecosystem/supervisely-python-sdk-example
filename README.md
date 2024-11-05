@@ -39,7 +39,7 @@ Import Supervisely, initialize API with your credentials and test authentication
 import json
 import supervisely as sly
 
-api = sly.Api(server_address="https://app.supervise.ly", token="4r47N...xaTatb")
+api = sly.Api(server_address="https://app.supervisely.com", token="4r47N...xaTatb")
 
 my_teams = api.team.get_list()
 print(f"I'm a member of {len(my_teams)} teams")
@@ -98,6 +98,6 @@ print("annotaiton:\n", json.dumps(ann_json, indent=4))
 
 In less than 50 lines of code (including lots of comments) you can easily automate Supervisely using Python and integrate it with your software stack.
 
-That’s just a taste of what you can do with the Supervisely SDK for Python. For more, take a look [at the reference](https://supervisely.readthedocs.io/en/latest/sdk\_packages.html) and [Supervisely Annotation JSON format](https://developer.supervise.ly/api-references/supervisely-annotation-json-format).
+That’s just a taste of what you can do with the Supervisely SDK for Python. For more, take a look [at the reference](https://supervisely.readthedocs.io/en/latest/sdk\_packages.html) and [Supervisely Annotation JSON format](https://developer.supervisely.com/api-references/supervisely-annotation-json-format).
 
 ![Result in labeling tool](https://user-images.githubusercontent.com/12828725/179226131-cd7f7058-ebca-4aa1-8660-951bf88a42af.png)
